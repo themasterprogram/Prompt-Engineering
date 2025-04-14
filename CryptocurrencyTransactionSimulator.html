@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoSim - Cryptocurrency Transaction Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+        }
+        .wallet-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .transaction-card {
+            transition: all 0.3s ease;
+        }
+        .transaction-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .coin {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-12">
+            <div class="flex items-center">
+                <i class="fab fa-ethereum text-4xl mr-3"></i>
+                <h1 class="text-3xl font-bold">CryptoSim</h1>
+            </div>
+            <div class="flex space-x-4">
+                <button id="connectWalletBtn" class="bg-white text-purple-600 px-6 py-2 rounded-full font-semibold hover:bg-purple-100 transition">
+                    Connect Wallet
+                </button>
+                <button class="bg-transparent border border-white px-6 py-2 rounded-full font-semibold hover:bg-white hover:text-purple-600 transition">
+                    <i class="fas fa-cog mr-2"></i>Settings
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Wallet Balance Card -->
+                <div class="wallet-card p-6 rounded-2xl shadow-lg col-span-1">
+                    <h2 class="text-xl font-semibold mb-4">My Wallet</h2>
+                    <div class="flex items-center mb-6">
+                        <div class="coin bg-yellow-400 w-12 h-12 rounded-full flex items-center justify-center text-2xl mr-4">
+                            <i class="fas fa-coins text-yellow-800"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm opacity-80">Balance</p>
+                            <p class="text-2xl font-bold" id="walletBalance">0 CSIM</p>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <p class="text-sm opacity-80 mb-1">Wallet Address</p>
+                        <p class="font-mono text-sm bg-black bg-opacity-20 p-2 rounded" id="walletAddress">Not connected</p>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <div>
+                            <p class="opacity-80">Transactions</p>
+                            <p class="font-semibold" id="transactionCount">0</p>
+                        </div>
+                        <div>
+                            <p class="opacity-80">Network</p>
+                            <p class="font-semibold">Ropsten Testnet</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transaction Form -->
+                <div class="wallet-card p-6 rounded-2xl shadow-lg col-span-1 lg:col-span-2">
+                    <h2 class="text-xl font-semibold mb-6">Send Cryptocurrency</h2>
+                    <form id="transactionForm">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2" for="recipient">Recipient Address</label>
+                            <input type="text" id="recipient" placeholder="0x..." 
+                                   class="w-full px-4 py-3 rounded-lg bg-black bg-opacity-20 border border-gray-600 focus:border-purple-400 focus:outline-none">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-2" for="amount">Amount (CSIM)</label>
+                            <input type="number" id="amount" placeholder="0.00" step="0.01" min="0"
+                                   class="w-full px-4 py-3 rounded-lg bg-black bg-opacity-20 border border-gray-600 focus:border-purple-400 focus:outline-none">
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium mb-2" for="message">Message (Optional)</label>
+                            <textarea id="message" rows="2" 
+                                      class="w-full px-4 py-3 rounded-lg bg-black bg-opacity-20 border border-gray-600 focus:border-purple-400 focus:outline-none"></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition">
+                            <i class="fas fa-paper-plane mr-2"></i> Send Transaction
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Transaction History -->
+            <div class="mt-12">
+                <h2 class="text-2xl font-bold mb-6">Transaction History</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left rounded-lg overflow-hidden">
+                        <thead class="bg-black bg-opacity-30">
+                            <tr>
+                                <th class="px-6 py-4">Tx Hash</th>
+                                <th class="px-6 py-4">From</th>
+                                <th class="px-6 py-4">To</th>
+                                <th class="px-6 py-4">Amount</th>
+                                <th class="px-6 py-4">Status</th>
+                                <th class="px-6 py-4">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionHistory" class="bg-black bg-opacity-10">
+                            <tr>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-400">
+                                    No transactions yet. Connect your wallet and make your first transaction!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-16 pt-8 border-t border-gray-700 text-center text-gray-300">
+            <p>CryptoSim - A cryptocurrency transaction simulator for educational purposes</p>
+            <p class="mt-2 text-sm">This is a simulation using the Ropsten test network. No real funds are used.</p>
+            <div class="flex justify-center space-x-4 mt-4">
+                <a href="#" class="hover:text-white"><i class="fab fa-github"></i></a>
+                <a href="#" class="hover:text-white"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-white"><i class="fab fa-discord"></i></a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold">Transaction Processing</h3>
+                <button id="closeModalBtn" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="text-center py-8">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                <p id="modalMessage">Waiting for transaction confirmation...</p>
+                <p class="text-sm text-gray-400 mt-2" id="txHash"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data for simulation
+        const sampleWallets = [
+            "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
+            "0xAb5801a7D398351b8bE11C439e05C5B3259aeC9B",
+            "0x4B0897b0513fdC7C541B6d9D7E929C4e5364D2dB",
+            "0x1Db3439a222C519ab44bb1144fC28167b4Fa6EE6",
+            "0xdD4c825203f97984e7867F11eeCc813A036089D1"
+        ];
+
+        // DOM Elements
+        const connectWalletBtn = document.getElementById('connectWalletBtn');
+        const walletBalance = document.getElementById('walletBalance');
+        const walletAddress = document.getElementById('walletAddress');
+        const transactionCount = document.getElementById('transactionCount');
+        const transactionForm = document.getElementById('transactionForm');
+        const transactionHistory = document.getElementById('transactionHistory');
+        const transactionModal = document.getElementById('transactionModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const modalMessage = document.getElementById('modalMessage');
+        const txHash = document.getElementById('txHash');
+
+        // State
+        let isConnected = false;
+        let balance = 1000; // Starting balance for simulation
+        let transactions = [];
+
+        // Connect Wallet Function
+        connectWalletBtn.addEventListener('click', () => {
+            if (!isConnected) {
+                // Simulate wallet connection
+                isConnected = true;
+                connectWalletBtn.textContent = 'Disconnect';
+                connectWalletBtn.classList.remove('bg-white', 'text-purple-600');
+                connectWalletBtn.classList.add('bg-red-500', 'text-white');
+                
+                // Generate random wallet address
+                const randomWallet = sampleWallets[Math.floor(Math.random() * sampleWallets.length)];
+                walletAddress.textContent = randomWallet;
+                walletBalance.textContent = `${balance} CSIM`;
+                
+                // Load sample transactions
+                loadSampleTransactions();
+            } else {
+                // Disconnect wallet
+                isConnected = false;
+                connectWalletBtn.textContent = 'Connect Wallet';
+                connectWalletBtn.classList.add('bg-white', 'text-purple-600');
+                connectWalletBtn.classList.remove('bg-red-500', 'text-white');
+                
+                walletAddress.textContent = 'Not connected';
+                walletBalance.textContent = '0 CSIM';
+                transactionCount.textContent = '0';
+                
+                // Clear transaction history
+                transactionHistory.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-400">
+                            No transactions yet. Connect your wallet and make your first transaction!
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+
+        // Transaction Form Submission
+        transactionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!isConnected) {
+                alert('Please connect your wallet first');
+                return;
+            }
+            
+            const recipient = document.getElementById('recipient').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const message = document.getElementById('message').value;
+            
+            if (!recipient || !amount) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            if (amount <= 0) {
+                alert('Amount must be greater than 0');
+                return;
+            }
+            
+            if (amount > balance) {
+                alert('Insufficient balance');
+                return;
+            }
+            
+            // Show transaction modal
+            transactionModal.classList.remove('hidden');
+            modalMessage.textContent = 'Waiting for transaction confirmation...';
+            
+            // Simulate blockchain transaction delay
+            setTimeout(() => {
+                // Generate random transaction hash
+                const randomHash = `0x${Math.random().toString(16).substr(2, 64)}`;
+                
+                // Update UI
+                modalMessage.textContent = 'Transaction confirmed!';
+                txHash.textContent = `Tx Hash: ${randomHash.substr(0, 16)}...${randomHash.substr(-8)}`;
+                
+                // Process transaction
+                processTransaction(recipient, amount, message, randomHash);
+                
+                // Auto-close modal after 3 seconds
+                setTimeout(() => {
+                    transactionModal.classList.add('hidden');
+                }, 3000);
+            }, 2000);
+        });
+
+        // Close modal
+        closeModalBtn.addEventListener('click', () => {
+            transactionModal.classList.add('hidden');
+        });
+
+        // Process transaction
+        function processTransaction(recipient, amount, message, txHash) {
+            // Update balance
+            balance -= amount;
+            walletBalance.textContent = `${balance} CSIM`;
+            
+            // Create transaction object
+            const newTransaction = {
+                hash: txHash,
+                from: walletAddress.textContent,
+                to: recipient,
+                amount: amount,
+                status: 'Confirmed',
+                date: new Date().toLocaleString(),
+                message: message
+            };
+            
+            // Add to transactions array
+            transactions.unshift(newTransaction);
+            
+            // Update transaction count
+            transactionCount.textContent = transactions.length;
+            
+            // Update transaction history
+            updateTransactionHistory();
+            
+            // Reset form
+            transactionForm.reset();
+        }
+
+        // Update transaction history table
+        function updateTransactionHistory() {
+            if (transactions.length === 0) {
+                transactionHistory.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-400">
+                            No transactions yet. Connect your wallet and make your first transaction!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            let html = '';
+            transactions.forEach(tx => {
+                html += `
+                    <tr class="transaction-card border-b border-gray-700 hover:bg-gray-800">
+                        <td class="px-6 py-4 font-mono text-sm">
+                            <a href="#" class="text-purple-400 hover:underline">${tx.hash.substr(0, 8)}...${tx.hash.substr(-8)}</a>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-sm">${tx.from.substr(0, 6)}...${tx.from.substr(-4)}</td>
+                        <td class="px-6 py-4 font-mono text-sm">${tx.to.substr(0, 6)}...${tx.to.substr(-4)}</td>
+                        <td class="px-6 py-4 font-semibold">${tx.amount} CSIM</td>
+                        <td class="px-6 py-4">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                ${tx.status}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm">${tx.date}</td>
+                    </tr>
+                `;
+            });
+            
+            transactionHistory.innerHTML = html;
+        }
+
+        // Load sample transactions
+        function loadSampleTransactions() {
+            // Generate some sample transactions
+            const sampleTx = [
+                {
+                    hash: '0x4a7e689cdd318f5a5b1f01b5b5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e',
+                    from: walletAddress.textContent,
+                    to: sampleWallets[1],
+                    amount: 50,
+                    status: 'Confirmed',
+                    date: new Date(Date.now() - 86400000).toLocaleString(),
+                    message: 'For coffee'
+                },
+                {
+                    hash: '0x3b6e689cdd318f5a5b1f01b5b5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e',
+                    from: sampleWallets[2],
+                    to: walletAddress.textContent,
+                    amount: 120,
+                    status: 'Confirmed',
+                    date: new Date(Date.now() - 172800000).toLocaleString(),
+                    message: 'Payment for services'
+                },
+                {
+                    hash: '0x2c5e689cdd318f5a5b1f01b5b5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e5f5e',
+                    from: walletAddress.textContent,
+                    to: sampleWallets[3],
+                    amount: 200,
+                    status: 'Confirmed',
+                    date: new Date(Date.now() - 259200000).toLocaleString(),
+                    message: 'Rent payment'
+                }
+            ];
+            
+            transactions = sampleTx;
+            transactionCount.textContent = transactions.length;
+            updateTransactionHistory();
+        }
+    </script>
+</body>
+</html>

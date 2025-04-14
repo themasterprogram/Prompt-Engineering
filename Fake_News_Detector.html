@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthSeeker - Fake News Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+        }
+        .news-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        .result-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .result-container.show {
+            max-height: 500px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-search-location text-2xl"></i>
+                <span class="text-xl font-bold">TruthSeeker</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#" class="hover:text-gray-200">Home</a>
+                <a href="#" class="hover:text-gray-200">About</a>
+                <a href="#" class="hover:text-gray-200">How It Works</a>
+                <a href="#" class="hover:text-gray-200">Resources</a>
+            </div>
+            <button class="md:hidden text-xl">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-8 md:mb-0">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">Detect Fake News in Seconds</h1>
+                <p class="text-xl mb-6">Our AI-powered tool analyzes news articles to determine their credibility and helps you stay informed with accurate information.</p>
+                <button class="bg-white text-blue-600 font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition duration-300">
+                    Try It Now <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <img src="https://illustrations.popsy.co/amber/digital-nomad.svg" alt="Fake News Detection" class="w-full max-w-md">
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- Detection Form -->
+        <section class="bg-white rounded-xl shadow-lg p-6 mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Check News Authenticity</h2>
+            <div class="flex flex-col md:flex-row gap-4 mb-6">
+                <div class="flex-1">
+                    <label for="news-url" class="block text-gray-700 mb-2">News Article URL</label>
+                    <div class="flex">
+                        <input type="url" id="news-url" placeholder="https://example.com/news-article" 
+                            class="flex-1 border border-gray-300 rounded-l-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="analyze-url" class="bg-blue-600 text-white py-3 px-6 rounded-r-lg hover:bg-blue-700 transition duration-300">
+                            Analyze
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center my-4 md:my-0 md:flex items-center">
+                    <span class="text-gray-500">OR</span>
+                </div>
+                <div class="flex-1">
+                    <label for="news-text" class="block text-gray-700 mb-2">Paste News Text</label>
+                    <div class="flex">
+                        <textarea id="news-text" rows="1" placeholder="Paste the news content here..." 
+                            class="flex-1 border border-gray-300 rounded-l-lg py-3 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        <button id="analyze-text" class="bg-blue-600 text-white py-3 px-6 rounded-r-lg hover:bg-blue-700 transition duration-300">
+                            Analyze
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Container -->
+            <div id="result-container" class="result-container">
+                <div class="border-t pt-6">
+                    <h3 class="text-xl font-semibold mb-4">Analysis Results</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-check-circle text-green-600"></i>
+                                </div>
+                                <span class="font-medium">Credibility Score</span>
+                            </div>
+                            <div class="text-3xl font-bold text-green-600" id="credibility-score">85%</div>
+                            <div class="text-gray-500 mt-1">High likelihood of being true</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-exclamation-triangle text-yellow-600"></i>
+                                </div>
+                                <span class="font-medium">Warning Signs</span>
+                            </div>
+                            <div class="text-3xl font-bold text-yellow-600" id="warning-signs">3</div>
+                            <div class="text-gray-500 mt-1">Potential red flags detected</div>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <div class="flex items-center mb-2">
+                                <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                    <i class="fas fa-info-circle text-blue-600"></i>
+                                </div>
+                                <span class="font-medium">Source Reliability</span>
+                            </div>
+                            <div class="text-3xl font-bold text-blue-600" id="source-reliability">B</div>
+                            <div class="text-gray-500 mt-1">Generally reliable source</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h4 class="font-semibold mb-2">Detailed Analysis</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
+                                    <i class="fas fa-check text-green-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Author Verification</p>
+                                    <p class="text-gray-600">The author has a verified profile and history of credible reporting.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 rounded-full bg-yellow-100 flex items-center justify-center mr-3 mt-1">
+                                    <i class="fas fa-exclamation text-yellow-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Emotional Language</p>
+                                    <p class="text-gray-600">Some emotionally charged language detected that may indicate bias.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-3 mt-1">
+                                    <i class="fas fa-check text-green-600 text-xs"></i>
+                                </div>
+                                <div>
+                                    <p class="font-medium">Fact-Checking</p>
+                                    <p class="text-gray-600">Key claims in the article are supported by multiple credible sources.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <h4 class="font-semibold mb-3">Recommended Actions</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-search text-blue-600 mr-2"></i>
+                                    <span class="font-medium">Cross-Check</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Verify with other reputable sources before sharing.</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-share-alt text-green-600 mr-2"></i>
+                                    <span class="font-medium">Share Carefully</span>
+                                </div>
+                                <p class="text-sm text-gray-600">This content appears credible but always share responsibly.</p>
+                            </div>
+                            <div class="bg-purple-50 p-4 rounded-lg border border-purple-100">
+                                <div class="flex items-center mb-2">
+                                    <i class="fas fa-bookmark text-purple-600 mr-2"></i>
+                                    <span class="font-medium">Save for Later</span>
+                                </div>
+                                <p class="text-sm text-gray-600">Bookmark this analysis for future reference.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold mb-8 text-center text-gray-800">How TruthSeeker Works</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-md news-card">
+                    <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center text-white text-xl mb-4">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Content Analysis</h3>
+                    <p class="text-gray-600">Our AI examines the language, structure, and claims in the article for signs of misinformation.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md news-card">
+                    <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center text-white text-xl mb-4">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Source Verification</h3>
+                    <p class="text-gray-600">We check the reputation and history of the news source to assess reliability.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md news-card">
+                    <div class="w-12 h-12 gradient-bg rounded-full flex items-center justify-center text-white text-xl mb-4">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Cross-Referencing</h3>
+                    <p class="text-gray-600">The system compares claims with other credible sources to verify accuracy.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Analysis -->
+        <section>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Recently Analyzed News</h2>
+                <a href="#" class="text-blue-600 hover:underline">View All</a>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden news-card">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Credible</span>
+                            <span class="text-gray-500 text-sm">2 hours ago</span>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">New Climate Change Study Shows Promising Results</h3>
+                        <p class="text-gray-600 text-sm mb-3">A recent study published in Nature shows significant progress in carbon capture technology...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">source: scientificamerican.com</span>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Analysis</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden news-card">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">Questionable</span>
+                            <span class="text-gray-500 text-sm">5 hours ago</span>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Celebrity Spotted with Alien in Miami</h3>
+                        <p class="text-gray-600 text-sm mb-3">Photos circulating online show a famous actor allegedly meeting with extraterrestrial beings...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">source: unknownorigin.net</span>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Analysis</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden news-card">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Needs Review</span>
+                            <span class="text-gray-500 text-sm">1 day ago</span>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Breakthrough Medical Treatment Cures All Diseases</h3>
+                        <p class="text-gray-600 text-sm mb-3">A small biotech company claims to have developed a universal cure for all known diseases...</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-500">source: healthbreakthroughs.com</span>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm font-medium">View Analysis</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="gradient-bg text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">TruthSeeker</h3>
+                    <p class="text-blue-100">Empowering you with tools to navigate the complex world of online information.</p>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-200">Home</a></li>
+                        <li><a href="#" class="hover:text-blue-200">About Us</a></li>
+                        <li><a href="#" class="hover:text-blue-200">How It Works</a></li>
+                        <li><a href="#" class="hover:text-blue-200">API Access</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="hover:text-blue-200">Fact-Checking Guide</a></li>
+                        <li><a href="#" class="hover:text-blue-200">Media Literacy</a></li>
+                        <li><a href="#" class="hover:text-blue-200">Trusted Sources</a></li>
+                        <li><a href="#" class="hover:text-blue-200">Research Papers</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-4">Connect</h4>
+                    <div class="flex space-x-4 mb-4">
+                        <a href="#" class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center hover:bg-blue-600">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center hover:bg-blue-600">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center hover:bg-blue-600">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-blue-700 flex items-center justify-center hover:bg-blue-600">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                    <p class="text-blue-100">Subscribe to our newsletter for updates</p>
+                    <div class="mt-2 flex">
+                        <input type="email" placeholder="Your email" class="flex-1 py-2 px-3 rounded-l text-gray-800">
+                        <button class="bg-blue-800 py-2 px-4 rounded-r hover:bg-blue-700">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-blue-700 mt-8 pt-6 text-center text-blue-200">
+                <p>&copy; 2023 TruthSeeker. All rights reserved. | <a href="#" class="hover:text-white">Privacy Policy</a> | <a href="#" class="hover:text-white">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle result container
+        document.getElementById('analyze-url').addEventListener('click', function() {
+            const url = document.getElementById('news-url').value;
+            if (url) {
+                showResults();
+            }
+        });
+
+        document.getElementById('analyze-text').addEventListener('click', function() {
+            const text = document.getElementById('news-text').value;
+            if (text) {
+                showResults();
+            }
+        });
+
+        function showResults() {
+            const container = document.getElementById('result-container');
+            container.classList.add('show');
+            
+            // Scroll to results
+            setTimeout(() => {
+                container.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+            
+            // Simulate analysis with random results (for demo)
+            setTimeout(() => {
+                const score = Math.floor(Math.random() * 40) + 60; // 60-100
+                const warnings = Math.floor(Math.random() * 5);
+                const sources = ['A', 'B', 'C'][Math.floor(Math.random() * 3)];
+                
+                document.getElementById('credibility-score').textContent = score + '%';
+                document.getElementById('credibility-score').className = 
+                    'text-3xl font-bold ' + (score > 80 ? 'text-green-600' : score > 60 ? 'text-yellow-600' : 'text-red-600');
+                
+                document.getElementById('warning-signs').textContent = warnings;
+                document.getElementById('source-reliability').textContent = sources;
+            }, 1500);
+        }
+
+        // Auto-expand textarea
+        document.getElementById('news-text').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>
